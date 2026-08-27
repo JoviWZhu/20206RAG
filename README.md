@@ -1,67 +1,29 @@
 # 20206RAG
 RAG Colab Code
 
-# Standard RAG Textbook Assistant 📚🤖
+# 🤖 Dual-Module Retrieval-Augmented Generation (RAG) Suite
 
-A lightweight, high-precision **Retrieval-Augmented Generation (RAG)** pipeline built with Python. This system connects an open-weight Large Language Model (`Llama-3.1-8B`) to a local vector database populated with high-quality educational data from the `FineWeb-Edu` dataset.
-
-This repository demonstrates how to build a fully localized semantic search index and route contextual prompt packages to a free cloud LLM endpoint securely—fully accessible globally, including from region-restricted networks like Hong Kong.
+An open-source, modular GenAI repository demonstrating end-to-end **Retrieval-Augmented Generation (RAG)** architectures for conversational Q&A and automated structured assessment generation.
 
 ---
 
-## 🏗️ System Architecture
+## 🌟 Overview
 
-The core pipeline bypasses model hallucinations by forcing the LLM to follow an "open-book exam" workflow:
+This repository contains two independent, production-oriented RAG applications developed in **Google Colab** and organized into dedicated, self-contained sub-modules:
 
-[User Query] ──> [1. Vector Embedding (MiniLM)] ──> [2. Local Search (FAISS Cosine)] ──> [3. Prompt Injection] ──> [4. Cloud LLM Generation]
-
-1. **Local Ingestion**: Downloads a clean, streaming slice of educational data from Hugging Face.
-2. **Dense Vector Mapping**: Uses `all-MiniLM-L6-v2` to transform text passages into 384-dimensional mathematical arrays.
-3. **Cosine Similarity Search**: Normalizes vectors using `faiss.normalize_L2` and indexes them inside an inner product space (`IndexFlatIP`) for perfect semantic alignment.
-4. **Context Grounding**: Strips away outside model knowledge by enforcing a strict system instruction matrix and a low temperature (`0.2`).
+1. **[RAG Bot](./rag-bot)** — A conversational Q&A engine engineered for semantic search, context retrieval, and grounded response generation over custom document collections.
+2. **[RAG Quiz](./rag-quiz)** — An automated question-and-assessment generator that ingests documents to produce context-verified quizzes, answers, and evaluation rubrics in structured formats (JSON/Markdown).
 
 ---
 
-## 🛠️ Tech Stack & Key Components
+## 📂 Repository Architecture
 
-* **Source Dataset:** [HuggingFaceFW/fineweb-edu](https://huggingface.co) (`sample-10BT`)
-* **Vector Database:** [FAISS-CPU](https://github.com)
-* **Embedding Model:** `sentence-transformers/all-MiniLM-L6-v2` (384 Dimensions)
-* **Generation LLM:** `meta-llama/Llama-3.1-8B-Instruct` (Hugging Face Serverless API)
-
----
-
-## 🚀 Getting Started
-
-### 1. Installation
-
-Install the required core dependencies inside your Python environment or Google Colab notebook:
-
-```bash
-pip install datasets sentence-transformers faiss-cpu huggingface_hub
-```
-
-### 2. Configuration
-
-Generate a free **User Access Token** (with `Read` permissions) from your Hugging Face Account Settings and add it to your pipeline:
-
-```python
-HF_TOKEN = "your_free_hugging_face_token_here"
-```
-
-### 3. Usage Example
-
-Initialize the pipeline and submit standard text queries to pull grounded educational insights:
-
-```python
-# Execute the search and generation workflow
-run_rag_query("What book or author is being discussed in these documents?", top_k=2)
-```
-
----
-
-## 🐛 Troubleshooting & Key Fixes Included
-
-* **FAISS Capitalization Bug:** Corrected legacy function calls to use `faiss.normalize_L2` (capital **L**) to prevent method execution crashes.
-* **Matrix Output Flattening:** Resolves `TypeError: only integer scalar arrays can be converted to a scalar index` by explicitly slicing the multidimensional matrix output arrays returned from `index.search()`.
-* **Dynamic SDK Type Response Unpacking:** Includes an automated type-unpacker fallback block that correctly handles both standard dictionary outputs and complex Pydantic `ChatCompletionOutput` elements seamlessly across different versions of the `huggingface_hub` client.
+```text
+.
+├── README.md               # Top-level landing page & suite overview
+├── rag-bot/                # Module 1: Conversational Q&A Bot
+│   ├── README.md           # Module-specific documentation & architecture
+│   └── rag_bot.ipynb       # Main Colab execution notebook
+└── rag-quiz/               # Module 2: Automated Quiz & Assessment Engine
+    ├── README.md           # Module-specific documentation & schema formats
+    └── rag_quiz.ipynb      # Main Colab execution notebook
