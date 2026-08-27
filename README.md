@@ -27,3 +27,10 @@ This repository contains two independent, production-oriented RAG applications d
 └── rag-quiz/               # Module 2: Automated Quiz & Assessment Engine
     ├── README.md           # Module-specific documentation & schema formats
     └── rag_quiz.ipynb      # Main Colab execution notebook
+
+
+Developer: Jovi Zhu
+
+GitHub: @JoviWZhu
+
+LinkedIn: https://www.linkedin.com/in/jovizhu
