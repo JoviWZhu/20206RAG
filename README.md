@@ -28,7 +28,7 @@ This repository contains two independent, production-oriented RAG applications d
     ├── README.md           # Module-specific documentation & schema formats
     └── rag_quiz.ipynb      # Main Colab execution notebook
 
-
+```
 Developer: Jovi Zhu
 
 GitHub: @JoviWZhu
