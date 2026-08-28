@@ -14,6 +14,13 @@ This repository contains two independent, production-oriented RAG applications d
 1. **[RAG Bot](./rag-bot)** — A conversational Q&A engine engineered for semantic search, context retrieval, and grounded response generation over custom document collections.
 2. **[RAG Quiz](./rag-quiz)** — An automated question-and-assessment generator that ingests documents to produce context-verified quizzes, answers, and evaluation rubrics in structured formats (JSON/Markdown).
 
+## 🗺️ Project Roadmap & Future Enhancements
+
+- [ ] **Hybrid Search:** Combine sparse (BM25) and dense vector search to improve keyword-specific retrieval accuracy.
+- [ ] **Advanced RAG Patterns:** Integrate re-ranking models (Cross-Encoders) and contextual compression.
+- [ ] **Automated RAG Evaluation:** Implement evaluation frameworks (e.g., Ragas) to measure context precision, recall, and answer faithfulness.
+- [ ] **API & UI Deployment:** Wrap execution pipelines in a FastAPI backend with a lightweight Streamlit web interface.
+
 ---
 
 ## 📂 Repository Architecture
