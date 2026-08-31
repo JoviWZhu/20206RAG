@@ -12,7 +12,9 @@ An advanced **Hybrid Retrieval-Augmented Generation (Hybrid RAG)** system built 
 Traditional vector-only RAG often fails to catch explicit, precise keywords (like exact definitions, acronyms, or proper nouns). This enterprise pattern uses a parallel search and rank topology:
 
 ┌──> [1. Semantic Search: FAISS (Cosine)] ──┐
+
 [User Query] ─────────┤├──> [3. Cross-Encoder Reranker] ──> [4. Llama 3.1 Study Guide]
+
 └──> [2. Keyword Search: BM25 (Exact)] ─────┘
 1. **Dense Retrieval (Concepts)**: Uses `all-MiniLM-L6-v2` and normalized **FAISS** index vectors to locate broad conceptual matches, synonyms, and search intent via Cosine Similarity.
 2. **Sparse Retrieval (Keywords)**: Uses the statistical **BM25 algorithm** (`rank_bm25`) to run exact string matches across text document tokens, pulling precise terms.
