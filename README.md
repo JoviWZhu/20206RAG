@@ -14,9 +14,13 @@ All pipelines utilize high-density natural language open data from the [HuggingF
 The repository is organized into four standalone, production-ready modules:
 
 ├── 📁 1-standard-rag/      # Semantic Dense Vector RAG via FAISS & Cosine Similarity
+
 ├── 📁 2-quiz-bot/          # Dynamic "Quiz Me" Bot utilizing Multi-Angle Prompting
+
 ├── 📁 3-hybrid-search/     # Enterprise Dense-Sparse Retrieval with BGE Cross-Attention Reranking
+
 └── 📁 4-teacher-sft/       # 4-Bit Parameter-Efficient Fine-Tuning (QLoRA) using SFTTrainer
+
 ---
 
 ## 🛠️ Deep Dive: The Four Core Milestones
