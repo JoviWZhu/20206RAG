@@ -1,76 +1,78 @@
 # 20206RAG
 RAG Colab Code
 
-# Open Educational AI Stack: From RAG to QLoRA Fine-Tuning 📚🤖
+# Parameter-Efficient Teacher Model Fine-Tuning (QLoRA) 🎓🔥
 
-A complete, production-grade curriculum demonstrating modern architectures in Large Language Model (LLM) engineering. This repository spans four evolutionary stages of development—progressing from basic semantic information retrieval to interactive pipelines, high-precision hybrid enterprise search engines, and parameter-efficient model training.
+This module demonstrates how to permanently alter the internal neural network communication weights of a foundational Large Language Model (`Gemma-2-2b-it`). By executing **Supervised Fine-Tuning (SFT)** on high-density data from the `FineWeb-Edu` dataset, the model shifts its default vocabulary, structure, and persona to act inherently like a disciplined, professional educator.
 
-All pipelines utilize high-density natural language open data from the [HuggingFaceFW/FineWeb-Edu](https://huggingface.co) dataset and are optimized for global deployment, including region-restricted runtimes.
-
----
-
-## 🗺️ Project Roadmap & Directory Layout
-
-The repository is organized into four standalone, production-ready modules:
-
-├── 📁 1-standard-rag/      # Semantic Dense Vector RAG via FAISS & Cosine Similarity
-
-├── 📁 2-quiz-bot/          # Dynamic "Quiz Me" Bot utilizing Multi-Angle Prompting
-
-├── 📁 3-hybrid-search/     # Enterprise Dense-Sparse Retrieval with BGE Cross-Attention Reranking
-
-└── 📁 4-teacher-sft/       # 4-Bit Parameter-Efficient Fine-Tuning (QLoRA) using SFTTrainer
+Unlike Retrieval-Augmented Generation (RAG) which passes temporary notes to a frozen model, fine-tuning modifies the model's actual base brain to adopt a specific tone without needing external context manuals injected into every prompt.
 
 ---
 
-## 🛠️ Deep Dive: The Four Core Milestones
+## 🏗️ Deep Learning Architecture
 
-### 1. Standard RAG Textbook Assistant (`/1-standard-rag`)
-Implements a baseline vector-retrieval pipeline. It maps raw textbook data into a local vector database and uses an "open-book exam" prompt template to ground model outputs and eliminate hallucinations.
-* **Core Stack:** `sentence-transformers/all-MiniLM-L6-v2` (384 Dimensions), `faiss-cpu` (`IndexFlatIP`).
-* **Key Innovation:** Uses strict L2 normalization boundary vectors to transition standard Euclidean distances into pure Cosine angular searches.
+Full parameter fine-tuning of multi-billion parameter networks requires hundreds of gigabytes of VRAM. This pipeline implements **QLoRA (Quantized Low-Rank Adaptation)** to compress the workload by 75%, allowing full training to execute on a single consumer or free cloud GPU (such as an NVIDIA T4 node).
 
-### 2. Interactive "Quiz Me" Bot (`/2-quiz-bot`)
-An interactive study companion that transforms static data rows into an endless testing game loop. It dynamically drafts multi-tiered questions and executes factual grading.
-* **Core Stack:** Native Python random utility loops, `meta-llama/Llama-3.1-8B-Instruct`.
-* **Key Innovation:** **Multi-Angle Prompting** matrix. It rotates through diverse pedagogical profiles (Definition tests, Misconception tracking, Real-World application) to stretch a minimal memory dataset footprint into an infinitely varied game lifecycle.
+[Base Model Weights] ──(Frozen in 4-bit NF4 Precision)──┐
 
-### 3. Enterprise Hybrid Search Engine (`/3-hybrid-search`)
-Addresses the structural blind spots of standard vector databases by running dense semantic searches and lexical keyword searches in parallel.
-* **Core Stack:** `rank_bm25` (Okapi framework), `BAAI/bge-reranker-base` Cross-Encoder.
-* **Key Innovation:** Uses dual-path processing to catch exact technical jargon/proper nouns, combining results into an attention-based reranker to isolate maximum contextual density before text generation.
+├──> [SFTTrainer Gradient Update Loop]
 
-### 4. Gated "Teacher" Model Fine-Tuning (`/4-teacher-sft`)
-Steps away from prompting constraints to permanently alter an AI model's internal neural network weights. It trains a base model to inherently communicate with the tone, discipline, and style of a professional educator.
-* **Core Stack:** `google/gemma-2-2b-it`, Hugging Face `trl` (`SFTTrainer` & `SFTConfig`), `peft` (LoRA/QLoRA), `bitsandbytes`.
-* **Key Innovation:** Implements 4-bit NormalFloat (`nf4`) quantization configs to run a complete optimization loop comfortably within free-tier consumer or cloud GPU environments (like a Google Colab T4 GPU node).
+[LoRA Adapter Layers]──(Active 16-bit BFloat Learning)──┘
+
+
+
+1. **4-Bit Quantization**: Compresses the base model down to **NormalFloat 4 (NF4)** parameters via `bitsandbytes`. This drops the VRAM baseline footprint drastically so it fits easily within a ~15GB memory envelope.
+2. **LoRA Adapters**: Freezes the base model completely. Instead of optimizing all 2 billion parameters, it injects small, low-rank matrix pairs (Rank `r=16`, `Alpha=32`) into the target attention projection layers (`q_proj`, `v_proj`). Only these tiny adapter layers learn during training.
+3. **Double Quantization**: Compresses the quantization constants themselves, reclaiming an extra `0.4 GB` of vital VRAM cache headroom.
 
 ---
 
-## ⚙️ Global Technical Fixes & Engineering Lessons Included
+## 🛠️ Tech Stack & Key Components
 
-This repository maintains rigorous compliance with the latest Hugging Face API updates. Key patches natively handled in the code tree include:
-* **FAISS Capitalization Normalization:** Patched legacy function mismatches by mapping strict case-sensitive `faiss.normalize_L2` methods.
-* **Matrix Output Unpacking:** Resolves indexing TypeErrors by flattening multidimensional arrays returned from raw FAISS search executions.
-* **SDK Response Type Fallbacks:** Integrates runtime conditional type-checking to parse both object attributes and raw dictionary schema outputs returned across changing serverless network routers.
-* **Modern TRL Framework Alignment:** Fully adapted to modern Hugging Face tokenization architectures by migrating sequence processing arguments into unified `SFTConfig` layouts and updating token tracking arrays to use explicit `processing_class` properties.
+* **Base Foundational Model:** [google/gemma-2-2b-it](https://huggingface.co) (Gated Repo)
+* **Training Dataset:** [HuggingFaceFW/fineweb-edu](https://huggingface.co) (`sample-10BT` text split)
+* **Optimization Framework:** Hugging Face `trl` (`SFTTrainer` & `SFTConfig`)
+* **Quantization & Adaption Backend:** `peft` & `bitsandbytes`
 
 ---
 
-## 🚀 Setup & Global Configuration
+## 🚀 Getting Started
 
-### 1. Ingestion Requirements
-Install the unified library matrix inside your target execution node:
+### 1. Ingestion Prerequisites
+
+Install the underlying deep learning compilation stack inside your environment or Google Colab notebook:
+
 ```bash
-pip install datasets transformers trl peft accelerate bitsandbytes sentence-transformers faiss-cpu rank_bm25 huggingface_hub
+pip install datasets transformers trl peft accelerate bitsandbytes
+```
+*CRITICAL: Ensure your runtime hardware accelerator is switched to **T4 GPU** before execution. Running this script in a standard CPU layout will result in an immediate runtime crash.*
+
+### 2. Gated Credential Authentication
+
+Because `gemma-2-2b-it` is a gated model repository, ensure you have clicked "Accept" on its Hugging Face page. Then, pass a classic Hugging Face token with **Write Permissions** directly into your variable block:
+
+```python
+HF_TOKEN = "your_classic_write_permission_token_here"
 ```
 
-### 2. Authorization Setup
-To execute training loops against gated weight trees (like Gemma), ensure your environment reads a classic Hugging Face token with active `Write` permissions:
-```python
-# Pass directly to pretrained parameters to bypass proxy barriers
-model = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", token="your_classic_write_token_here")
-```
+### 3. Execution Lifecycle
+
+Run the script cell. The `SFTTrainer` will ingest 500 textbook passages, convert them to native datasets via `Dataset.from_list()`, map the text structural instructions row-by-row, and kick off the 50-step optimization loop.
+
+The training phase naturally requires intense backward gradient calculus passes and typically completes in **6 to 10 minutes** on a standard free-tier T4 GPU.
+
+---
+
+## 🎯 Production Engineering Highlights & Framework Patches
+
+The codebase contains strict structural engineering patterns to align with the absolute latest Hugging Face TRL library versions:
+* **Row-by-Row Dataset Mapping:** Replaces legacy bulk array functions with a granular `.map(formatting_prompts_func)` wrapper. This fixes internal `trl` validation `AttributeError` conflicts by preventing tokenization utilities from checking list objects instead of primitive text strings.
+* **Unified SFTConfig Class Migration:** Adapts to the modern TRL API framework by moving positional argument limits (like `max_length`) out of the raw trainer initialization block and into the dedicated `SFTConfig` parameter layout.
+* **Processing Class Standardization:** Upgrades the legacy `tokenizer` parameters to use the modern, multi-modal compliant `processing_class` variable argument tags.
+* **Prompt Slice Inference Output:** Features an optimized post-training validation block (`outputs[inputs["input_ids"].shape:]`) that cleanly slices away input conversation sequences to ensure only the raw generated teacher answers print directly onto your console logs.
+
+---
+
 Developer: Jovi Zhu
 
 GitHub: @JoviWZhu
