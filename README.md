@@ -14,37 +14,64 @@ All components are optimized for minimal memory overhead and seamless execution 
 The architecture operates as a multi-stage engine divided into structured metadata extraction, hybrid candidate selection, pre-filtering, and cross-encoder reranking before passing contextual payloads to the LLM layer:
 
 [ Raw Educational Text ]
+
 │
+
 ▼
+
 [ Metadata Extraction (Gemini SDK + Pydantic Schema) ] ──► (Domain, Sub-topic, Audience)
+
 │
+
 ▼
+
 ┌────────────────────────────────────────────────────────────────────────┐
+
 │                        User Query Input                                │
+
 └────────────────────────────────────────────────────────────────────────┘
+
 │
+
 ┌─────┴────────────────────────────────────────────────┐
+
 ▼                                                      ▼
+
 [ Pathway A: Dense Retrieval ]             [ Pathway B: Sparse Retrieval ]
+
 
 sentence-transformers                     - rank_bm25 (Okapi BM25)
 
 FAISS Vector Index (L2 Norm)                  - Metadata Pre-Filtering
 
 Metadata Pre-Filtering                        - Lexical Keyword Match
+
 │                                                      │
+
 └──────────────────────┬───────────────────────────────┘
+
 ▼
+
 [ Dual-Candidate Pool Fusion & Deduplication ]
+
 │
+
 ▼
+
 [ Cross-Encoder Reranking (BAAI/bge) ]
+
 │
+
 ▼
+
 [ Top-K Context Assembly & Prompt Grounding ]
+
 │
+
 ▼
+
 [ Final LLM Generation via Google AI (gemini-3.1-flash-lite) ]
+
 
 
 ---
