@@ -40,12 +40,11 @@ The architecture operates as a multi-stage engine divided into structured metada
 [ Pathway A: Dense Retrieval ]             [ Pathway B: Sparse Retrieval ]
 
 
-sentence-transformers                     - rank_bm25 (Okapi BM25)
+- sentence-transformers                     - rank_bm25 (Okapi BM25)
 
-FAISS Vector Index (L2 Norm)                  - Metadata Pre-Filtering
+- FAISS Vector Index (L2 Norm)                  - Lexical Keyword Match
 
-Metadata Pre-Filtering                        - Lexical Keyword Match
-
+- Metadata Pre-Filtering                        - Metadata Pre-Filtering                       
 │                                                      │
 
 └──────────────────────┬───────────────────────────────┘
