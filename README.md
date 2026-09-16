@@ -1,78 +1,110 @@
-# 20206RAG
-RAG Colab Code
+Markdown
+# 20206RAG 📚🤖
 
-# Open Educational AI Stack: From RAG to QLoRA Fine-Tuning 📚🤖
+### Metadata-Filtered Hybrid RAG & Structured LLM Pipeline
 
-A complete, production-grade curriculum demonstrating modern architectures in Large Language Model (LLM) engineering. This repository spans four evolutionary stages of development—progressing from basic semantic information retrieval to interactive pipelines, high-precision hybrid enterprise search engines, and parameter-efficient model training.
+A production-grade, end-to-end Retrieval-Augmented Generation (RAG) and document metadata extraction pipeline. Built to bridge the gap between unstructured educational text parsing, attribute-filtered multi-stage search, and structured schema extraction, this codebase leverages modern vector indexing, sparse keyword lookup, cross-encoder reranking, and Google AI SDK primitives.
 
-All pipelines utilize high-density natural language open data from the [HuggingFaceFW/FineWeb-Edu](https://huggingface.co) dataset and are optimized for global deployment, including region-restricted runtimes.
-
----
-
-## 🗺️ Project Roadmap & Directory Layout
-
-The repository is organized into four standalone, production-ready modules:
-
-├── 📁 1-standard-rag/      # Semantic Dense Vector RAG via FAISS & Cosine Similarity
-
-├── 📁 2-quiz-bot/          # Dynamic "Quiz Me" Bot utilizing Multi-Angle Prompting
-
-├── 📁 3-hybrid-search/     # Enterprise Dense-Sparse Retrieval with BGE Cross-Attention Reranking
-
-└── 📁 4-teacher-sft/       # 4-Bit Parameter-Efficient Fine-Tuning (QLoRA) using SFTTrainer
+All components are optimized for minimal memory overhead and seamless execution within resource-constrained environments like Google Colab.
 
 ---
 
-## 🛠️ Deep Dive: The Four Core Milestones
+## 🗺️ Pipeline Architecture & System Workflow
 
-### 1. Standard RAG Textbook Assistant (`/1-standard-rag`)
-Implements a baseline vector-retrieval pipeline. It maps raw textbook data into a local vector database and uses an "open-book exam" prompt template to ground model outputs and eliminate hallucinations.
-* **Core Stack:** `sentence-transformers/all-MiniLM-L6-v2` (384 Dimensions), `faiss-cpu` (`IndexFlatIP`).
-* **Key Innovation:** Uses strict L2 normalization boundary vectors to transition standard Euclidean distances into pure Cosine angular searches.
+The architecture operates as a multi-stage engine divided into structured metadata extraction, hybrid candidate selection, pre-filtering, and cross-encoder reranking before passing contextual payloads to the LLM layer:
 
-### 2. Interactive "Quiz Me" Bot (`/2-quiz-bot`)
-An interactive study companion that transforms static data rows into an endless testing game loop. It dynamically drafts multi-tiered questions and executes factual grading.
-* **Core Stack:** Native Python random utility loops, `meta-llama/Llama-3.1-8B-Instruct`.
-* **Key Innovation:** **Multi-Angle Prompting** matrix. It rotates through diverse pedagogical profiles (Definition tests, Misconception tracking, Real-World application) to stretch a minimal memory dataset footprint into an infinitely varied game lifecycle.
+[ Raw Educational Text ]
+│
+▼
+[ Metadata Extraction (Gemini SDK + Pydantic Schema) ] ──► (Domain, Sub-topic, Audience)
+│
+▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        User Query Input                                │
+└────────────────────────────────────────────────────────────────────────┘
+│
+┌─────┴────────────────────────────────────────────────┐
+▼                                                      ▼
+[ Pathway A: Dense Retrieval ]             [ Pathway B: Sparse Retrieval ]
 
-### 3. Enterprise Hybrid Search Engine (`/3-hybrid-search`)
-Addresses the structural blind spots of standard vector databases by running dense semantic searches and lexical keyword searches in parallel.
-* **Core Stack:** `rank_bm25` (Okapi framework), `BAAI/bge-reranker-base` Cross-Encoder.
-* **Key Innovation:** Uses dual-path processing to catch exact technical jargon/proper nouns, combining results into an attention-based reranker to isolate maximum contextual density before text generation.
+sentence-transformers                     - rank_bm25 (Okapi BM25)
 
-### 4. Gated "Teacher" Model Fine-Tuning (`/4-teacher-sft`)
-Steps away from prompting constraints to permanently alter an AI model's internal neural network weights. It trains a base model to inherently communicate with the tone, discipline, and style of a professional educator.
-* **Core Stack:** `google/gemma-2-2b-it`, Hugging Face `trl` (`SFTTrainer` & `SFTConfig`), `peft` (LoRA/QLoRA), `bitsandbytes`.
-* **Key Innovation:** Implements 4-bit NormalFloat (`nf4`) quantization configs to run a complete optimization loop comfortably within free-tier consumer or cloud GPU environments (like a Google Colab T4 GPU node).
+FAISS Vector Index (L2 Norm)                  - Metadata Pre-Filtering
+
+Metadata Pre-Filtering                        - Lexical Keyword Match
+│                                                      │
+└──────────────────────┬───────────────────────────────┘
+▼
+[ Dual-Candidate Pool Fusion & Deduplication ]
+│
+▼
+[ Cross-Encoder Reranking (BAAI/bge) ]
+│
+▼
+[ Top-K Context Assembly & Prompt Grounding ]
+│
+▼
+[ Final LLM Generation via Google AI (gemini-3.1-flash-lite) ]
+
 
 ---
 
-## ⚙️ Global Technical Fixes & Engineering Lessons Included
+## 🛠️ Key Technical Modules
 
-This repository maintains rigorous compliance with the latest Hugging Face API updates. Key patches natively handled in the code tree include:
-* **FAISS Capitalization Normalization:** Patched legacy function mismatches by mapping strict case-sensitive `faiss.normalize_L2` methods.
-* **Matrix Output Unpacking:** Resolves indexing TypeErrors by flattening multidimensional arrays returned from raw FAISS search executions.
-* **SDK Response Type Fallbacks:** Integrates runtime conditional type-checking to parse both object attributes and raw dictionary schema outputs returned across changing serverless network routers.
-* **Modern TRL Framework Alignment:** Fully adapted to modern Hugging Face tokenization architectures by migrating sequence processing arguments into unified `SFTConfig` layouts and updating token tracking arrays to use explicit `processing_class` properties.
+### 1. Schema-Driven Metadata Extraction Engine
+Extracts granular academic attributes from raw text chunks into strict JSON formats to enable targeted downstream filtering.
+* **Core Stack:** `google-genai` SDK, `Pydantic` (`BaseModel`), `gemini-3.1-flash-lite`
+* **Key Innovation:** Enforces schema validity at the API layer via `response_schema` and Pydantic `Literal` enumerations. It safely fallbacks to regex string cleaning and custom object parsing if standard JSON payloads encounter edge-case whitespace errors.
+
+### 2. Attribute-Prefiltered Hybrid Search
+Solves the semantic drift problem in standard vector search by applying strict metadata constraints before similarity scoring.
+* **Core Stack:** `faiss-cpu`, `rank_bm25`, `sentence-transformers`
+* **Key Innovation:** Features a two-pass pre-filtering engine (`passes_filter`) that evaluates candidate metadata inline across both dense vector search and sparse keyword lookups. Over-fetching strategies (`overfetch_k`) ensure high candidate density even under aggressive filter conditions.
+
+### 3. Cross-Encoder Context Reranking
+Isolates maximum contextual precision from fused candidate pools.
+* **Core Stack:** `BAAI/bge-reranker-base` / `SentenceTransformer` CrossEncoder
+* **Key Innovation:** Evaluates query-document pairs jointly with full cross-attention scoring. This eliminates false-positive vector hits and selects only the top $K$ most informative contexts for the final prompt payload.
+
+### 4. Grounded Response Generation
+Generates strict, hallucination-free answers derived exclusively from retrieved search context.
+* **Core Stack:** Google AI SDK (`types.GenerateContentConfig`), system instruction grounding
+* **Key Innovation:** Uses system-level instructional boundaries to restrict response generation to retrieved context, returning standardized fallbacks (`I cannot find the answer in the provided documents.`) when knowledge gaps occur.
 
 ---
 
-## 🚀 Setup & Global Configuration
+## ⚙️ Engineering & Runtime Patch Highlights
 
-### 1. Ingestion Requirements
-Install the unified library matrix inside your target execution node:
+* **Robust JSON Extraction Fixes:** Eliminates `json.loads()` string parsing exceptions by integrating `response.parsed.model_dump()` alongside regex-based code-fence strippers (`re.sub`).
+* **FAISS Over-fetching Strategy:** Implements adaptive top-$K$ over-fetching to maintain retrieval yield when metadata pre-filters drop non-matching items.
+* **Google AI API Alignment:** Standardized configuration layers using `types.GenerateContentConfig` for unified handling of system instructions, temperature limits, max token bounds, and structured JSON outputs.
+
+---
+
+## 🚀 Quickstart Guide
+
+### Prerequisites
+Install the required dependencies:
 ```bash
-pip install datasets transformers trl peft accelerate bitsandbytes sentence-transformers faiss-cpu rank_bm25 huggingface_hub
+pip install google-genai pydantic faiss-cpu rank-bm25 sentence-transformers numpy
+
 ```
 
-### 2. Authorization Setup
-To execute training loops against gated weight trees (like Gemma), ensure your environment reads a classic Hugging Face token with active `Write` permissions:
-```python
-# Pass directly to pretrained parameters to bypass proxy barriers
-model = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", token="your_classic_write_token_here")
-```
-Developer: Jovi Zhu
+Set your API Key:
 
-GitHub: @JoviWZhu
+Bash
+export GEMINI_API_KEY="your-google-ai-api-key"
+Basic Execution
+Python
+from google import genai
 
-LinkedIn: https://www.linkedin.com/in/jovizhu
+# Initialize Client
+client = genai.Client()
+
+# Run Metadata-Filtered Search & Generation
+run_attribute_hybrid_rag_search(
+    user_query="How do granitic intrusions form in Chile?",
+    attribute_filter={"domain": "STEM"},
+    top_n_candidates=5,
+    final_top_k=2
+)
