@@ -13,63 +13,27 @@ All components are optimized for minimal memory overhead and seamless execution 
 
 The architecture operates as a multi-stage engine divided into structured metadata extraction, hybrid candidate selection, pre-filtering, and cross-encoder reranking before passing contextual payloads to the LLM layer:
 
-[ Raw Educational Text ]
+```mermaid
+flowchart TD
+    A["Raw Educational Text"] --> B["Metadata Extraction Engine<br><i>(Gemini SDK + Pydantic Schema)</i>"]
+    B --> C("Metadata Attributes<br><i>(Domain, Sub-topic, Audience)</i>")
+    
+    U["User Query Input"] --> P1 & P2
 
-│
+    subgraph Retrieval ["Parallel Pre-Filtered Retrieval"]
+        P1["Pathway A: Dense Retrieval<br>• sentence-transformers<br>• FAISS Vector Index (L2 Norm)<br>• Metadata Pre-Filtering"]
+        P2["Pathway B: Sparse Retrieval<br>• rank_bm25 (Okapi BM25)<br>• Lexical Keyword Match<br>• Metadata Pre-Filtering"]
+    end
 
-▼
+    P1 --> F["Dual-Candidate Pool Fusion & Deduplication"]
+    P2 --> F
 
-[ Metadata Extraction (Gemini SDK + Pydantic Schema) ] ──► (Domain, Sub-topic, Audience)
+    F --> R["Cross-Encoder Reranking<br><i>(BAAI/bge-reranker-base)</i>"]
+    R --> T["Top-K Context Assembly & Prompt Grounding"]
+    T --> L["Final LLM Generation via Google AI<br><i>(gemini-3.1-flash-lite)</i>"]
 
-│
-
-▼
-
-┌────────────────────────────────────────────────────────┐
-
-│                        User Query Input                │
-
-└────────────────────────────────────────────────────────┘
-
-│
-
-┌─────┴────────────────────────────────────────────────┐
-
-▼                                                      ▼
-
-[ Pathway A: Dense Retrieval ]             [ Pathway B: Sparse Retrieval ]
-
-
-- sentence-transformers                     - rank_bm25 (Okapi BM25)
-
-- FAISS Vector Index (L2 Norm)                  - Lexical Keyword Match
-
-- Metadata Pre-Filtering                        - Metadata Pre-Filtering                       
-│                                                      │
-
-└──────────────────────┬───────────────────────────────┘
-
-▼
-
-[ Dual-Candidate Pool Fusion & Deduplication ]
-
-│
-
-▼
-
-[ Cross-Encoder Reranking (BAAI/bge) ]
-
-│
-
-▼
-
-[ Top-K Context Assembly & Prompt Grounding ]
-
-│
-
-▼
-
-[ Final LLM Generation via Google AI (gemini-3.1-flash-lite) ]
+    style Retrieval fill:#f9f9f9,stroke:#666,stroke-width:1px,stroke-dasharray: 5 5
+```
 
 
 
